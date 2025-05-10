@@ -1,0 +1,99 @@
+TASK 2 
+Ingest structured data using Apache Sqoop. 
+
+Verify Sqoop
+sqoop version
+Start the MySQL Server
+sudo service mysql start
+log in to MySQL
+mysql -u root -p
+pwd:cloudera
+create database
+CREATE DATABASE company;
+USE company;
+Create table:
+CREATE TABLE employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    age INT,
+    salary FLOAT
+);
+Insert records
+INSERT INTO employees VALUES
+(1, 'John', 30, 50000),
+(2, 'Alice', 28, 60000),
+(3, 'Bob', 35, 75000);
+Retrieve records:
+SELECT * FROM employees;
+Exit MySQL:
+exit;
+List all databases in MySQL using sqoop:
+sqoop list-databases --connect jdbc:mysql://localhost:3306/ --username root --password cloudera
+list tables inside the company database:
+sqoop list-tables --connect jdbc:mysql://localhost:3306/company --username root --password cloudera
+import operation:
+sqoop import --connect jdbc:mysql://localhost:3306/company --username root --password cloudera --table employees --m 1 --target-dir /user/cloudera/employees_data
+check the data:
+hdfs dfs -cat /user/cloudera/employees_data/*
+
+export operation:
+sqoop export --connect jdbc:mysql://localhost:3306/vb --username root --password cloudera --table emp --export-dir emp/* --input-fields-terminated-by ',' --columns "id,name,age" --m 1
+
+
+
+
+
+
+
+
+
+
+Ingest structured and unstructured data using Flume. 
+
+Structured Data (MySQL Data to HDFS)
+verify Flume is installed: flume-ng version
+Configure Structured Data: sudo nano /etc/flume-ng/conf/mysql-flume.conf
+
+agent1.sources = mysql_source
+agent1.sinks = hdfs_sink
+agent1.channels = mem_channel
+agent1.sources.mysql_source.type = exec
+agent1.sources.mysql_source.command = mysql -u root -p'yourpassword' -e "SELECT * FROM database.table;"
+agent1.sources.mysql_source.shell = /bin/bash -c
+agent1.channels.mem_channel.type = memory
+agent1.channels.mem_channel.capacity = 1000
+agent1.channels.mem_channel.transactionCapacity = 100
+agent1.sinks.hdfs_sink.type = hdfs
+agent1.sinks.hdfs_sink.hdfs.path = hdfs://localhost:8020/user/flume/mysql_data/
+agent1.sinks.hdfs_sink.hdfs.fileType = DataStream
+agent1.sinks.hdfs_sink.hdfs.writeFormat = Text
+agent1.sinks.hdfs_sink.hdfs.rollInterval = 10
+agent1.sources.mysql_source.channels = mem_channel
+agent1.sinks.hdfs_sink.channel = mem_channel
+Start the Flume Agents: flume-ng agent --conf /etc/flume-ng/conf/ --name agent1 --conf-file /etc/flume-ng/conf/mysql-flume.conf -Dflume.root.logger=INFO,console
+Verify Data in HDFS: hdfs dfs -ls /user/flume/mysql_data/
+Unstructured Data (Log Files to HDFS)
+Configure Unstructured Data: sudo nano /etc/flume-ng/conf/logs-flume.conf
+
+agent2.sources = log_source
+agent2.sinks = hdfs_sink
+agent2.channels = file_channel
+agent2.sources.log_source.type = exec
+agent2.sources.log_source.command = tail -F /var/log/syslog
+agent2.channels.file_channel.type = file
+agent2.channels.file_channel.capacity = 1000
+agent2.channels.file_channel.transactionCapacity = 100
+agent2.sinks.hdfs_sink.type = hdfs
+agent2.sinks.hdfs_sink.hdfs.path = hdfs://localhost:8020/user/flume/log_data/
+agent2.sinks.hdfs_sink.hdfs.fileType = DataStream
+agent2.sinks.hdfs_sink.hdfs.writeFormat = Text
+agent2.sinks.hdfs_sink.hdfs.rollInterval = 10
+agent2.sources.log_source.channels = file_channel
+agent2.sinks.hdfs_sink.channel = file_channel
+Start the Flume Agent: flume-ng agent --conf /etc/flume-ng/conf/ --name agent2 --conf-file /etc/flume-ng/conf/logs-flume.conf -Dflume.root.logger=INFO,console
+Verify Data in HDFS : hdfs dfs -ls /user/flume/log_data/
+
+Send data through:
+echo "Hello AIML-C Flume Program " | sudo tee -a /var/log/syslog
+
+

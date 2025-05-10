@@ -1,0 +1,335 @@
+Write a word count program to simulate the Map Reduce Paradigm. 
+
+
+Create mapper.py
+nano mapper.py
+
+open a notepad, type the program and save (ctrl+x-> Y then Enter)
+
+
+
+Mapper.py code
+#!/usr/bin/env python
+import sys
+
+# Read input line by line
+for line in sys.stdin:
+    words = line.strip().split()
+    for word in words:
+        print "%s\t1" % word  
+
+
+
+Execute mapper.py
+
+
+
+Test using 
+
+echo "hello world hello" | python mapper.py
+
+
+
+Create reducer.py 
+nano mapper.py
+
+Reducer.py Code: 
+#!/usr/bin/env python
+import sys
+word_counts = {}
+# Read input from stdin
+for line in sys.stdin:
+    word, count = line.strip().split("\t", 1)  # Split by tab
+    try:
+        count = int(count)  # Convert count to integer
+        if word in word_counts:
+            word_counts[word] += count
+        else:
+            word_counts[word] = count
+    except ValueError:
+        pass  # Ignore lines with unexpected format
+
+# Print word counts
+for word in sorted(word_counts):
+    print "%s\t%d" % (word, word_counts[word])  
+
+
+
+
+execute using 
+
+chmod +x reducer.py
+
+
+Test Using:
+echo -e "hello\t1\nworld\t1\nhello\t1" | python reducer.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cretae a text file 
+
+
+
+Export to HDFS:
+
+
+
+
+
+
+Run the Command
+
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar -input zxc/c.txt -output zxc/output -mapper "python mapper.py" -reducer "python reducer.py" -file mapper.py -file reducer.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Output file is created in zxc directory
+
+
+
+Run the output
+
+hdfs dfs -ls zxc/outut
+
+hdfs dfs -cat zxc/output/part-00000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Write a Map Reduce program to perform matrix multiplication. 
+
+Create a file for mapper
+ nano m1.py
+
+
+write mapper class code:
+mapper.py:
+#!/usr/bin/env python
+import sys
+
+M = 2  # Number of rows in Matrix A
+N = 2  # Number of columns in Matrix A (also rows in Matrix B)
+P = 2  # Number of columns in Matrix B
+
+for line in sys.stdin:
+    values = line.strip().split()
+    if len(values) != 4:
+        continue  # Skip malformed lines
+
+    matrix, row, col, val = values
+    row = int(row)
+    col = int(col)
+    val = float(val)
+
+    if matrix == "A":
+        for k in range(P):  # P is the number of columns in Matrix B
+            print "%d,%d\tA,%d,%f" % (row, k, col, val)
+
+    elif matrix == "B":
+        for i in range(M):  # M is the number of rows in Matrix A
+            print "%d,%d\tB,%d,%f" % (i, col, row, val)
+
+
+
+make the code executable: 
+   chmod +x m1.py
+
+
+write the code for reducer class: 
+nano r1.py
+
+reducer.py
+#!/usr/bin/env python
+import sys
+
+# Debugging: Check if reducer starts
+sys.stderr.write("Reducer started...\n")
+
+# Dictionary to store matrix values
+matrix_data = {}
+
+# Read input from mapper
+for line in sys.stdin:
+    sys.stderr.write("Received line: %s\n" % line)  # Debugging
+    line = line.strip()
+
+    if "\t" not in line:
+        continue  # Skip malformed lines
+
+    try:
+        key, value = line.split("\t")
+        i, j = map(int, key.split(","))
+
+        parts = value.split(",")
+        if len(parts) != 3:
+            continue  # Skip incorrectly formatted lines
+
+        matrix_type = parts[0]
+        k = int(parts[1])
+        val = float(parts[2])
+
+        if (i, j) not in matrix_data:
+            matrix_data[(i, j)] = {"A": {}, "B": {}}
+
+        if matrix_type == "A":
+            matrix_data[(i, j)]["A"][k] = val
+        elif matrix_type == "B":
+            matrix_data[(i, j)]["B"][k] = val
+
+    except Exception as e:
+        sys.stderr.write("Error processing line: %s\n" % line)
+        sys.stderr.write("Exception: %s\n" % str(e))
+        continue  # Skip problematic lines
+
+# Compute matrix multiplication result
+for (i, j), values in matrix_data.items():
+    result = 0
+    a_values = values["A"]
+    b_values = values["B"]
+
+    for k in a_values:
+        if k in b_values:
+            result += a_values[k] * b_values[k]
+
+    print "%d,%d\t%f" % (i, j, result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+make it executable: 
+chmod +x r1.py
+
+
+create a text file for matrix input 
+nano matrix.txt
+
+
+
+
+Write the matrix input (2X2 matrix)
+
+A   0   0   1
+A   0   1   2
+A   1   0   3
+A   1   1   4
+B   0   0   5
+B   0   1   6
+B   1   0   7
+B   1   1   8
+
+Run the mapper class: cat matrix.txt | python m1.py
+
+
+Run the reducer class: cat matrix.txt | python m1.py | sort | python r1.py
+
+
+
+
+
+upload this to hdfs
+hdfs dfs -mkdir mat
+hdfs dfs -copyFromLocal matrix.txt mat/
+hdfs dfs -ls mat/
+
+
+Read the input file in hdfs 
+   Hdfs dfs -cat mat/matrix.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run the input file to perform matrix multiplication using mapper and reducer classes
+
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar -input mat/matrix.txt -output mat/output -mapper "python m1.py" -reducer "python r1.py" -file m1.py -file r1.py
+
+
+
+Open the output file in mat directory
+hdfs dfs -ls mat
+hdfs dfs -ls mat/output
+
+
+Open the part file to see the output
+hdfs dfs -cat mat/output/part-00000
+

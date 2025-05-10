@@ -1,0 +1,71 @@
+TASK 7 
+Create User Defined Functions/Eval functions in Pig to handle unwanted data during data processing. 
+
+w.txt:
+01/01/2010,12.4,18.7
+05/02/2010,10.5,25.3
+10/06/2011,20.3,32.1
+15/08/2011,22.1,35.6
+20/04/2012,15.7,28.3
+25/12/2012,-5.0,30.8      <-- INVALID (Negative min temp)
+30/07/2013,26.8,40.5
+05/11/2013,10.2,25.9
+12/09/2014,24.5,38.7
+18/10/2014,50.0,41.2      <-- INVALID (Max temp < Min temp)
+,,                          <-- INVALID (Missing values)
+23/05/2015,NaN,32.0       <-- INVALID (NaN min temp)
+30/07/2015,22.0,          <-- INVALID (Missing max temp)
+01/01/2016,15.0,NaN       <-- INVALID (NaN max temp)
+15/06/2016,19.4,39.7
+22/11/2016,-3.5,28.2      <-- INVALID (Negative min temp)
+10/08/2017,26.3,42.5
+31/12/2017,29.1,45.0
+04/07/2018,24.0,38.4
+20/10/2018,21.8,37.2
+
+
+
+
+
+cw.py
+@outputSchema("cleaned_record: tuple(date:chararray, min_temp:float, max_temp:float)")
+def clean_data(date, min_temp, max_temp):
+    try:
+        if not date or not min_temp or not max_temp:
+            return None
+        
+        min_temp = float(min_temp)
+        max_temp = float(max_temp)
+
+        if min_temp != min_temp or max_temp != max_temp:
+            return None
+
+        if min_temp < 0 or max_temp < 0:
+            return None
+        
+        if max_temp < min_temp:
+            return None
+
+        return (date, min_temp, max_temp)
+
+    except (ValueError, TypeError):
+        return None
+
+
+
+cw.pig
+REGISTER 'cw.py' USING jython AS weather_udf;
+
+weather_data = LOAD 't7/w.txt' USING PigStorage(',')
+    AS (date:CHARARRAY, min_temp:CHARARRAY, max_temp:CHARARRAY);
+
+filtered_data = FOREACH weather_data GENERATE weather_udf.clean_data(date, min_temp, max_temp) AS cleaned_record;
+
+valid_data = FILTER filtered_data BY cleaned_record IS NOT NULL;
+
+cleaned_weather = FOREACH valid_data GENERATE cleaned_record.date, cleaned_record.min_temp, cleaned_record.max_temp;
+
+STORE cleaned_weather INTO 't7/c' USING PigStorage(',');
+
+Run the script: pig -x mapreduce cw.pig
+

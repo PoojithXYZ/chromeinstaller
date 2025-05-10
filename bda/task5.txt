@@ -1,0 +1,78 @@
+TASK 5 
+Write a Pig Latin script to sort, group, join, project, and filter the data. 
+ e.txt
+101,John,Sales,65000
+102,Alice,HR,70000
+103,Bob,IT,80000
+104,Eve,Sales,55000
+105,Charlie,Finance,90000
+106,Mike,IT,75000
+107,Susan,HR,72000
+108,David,Finance,68000
+109,Emma,Sales,62000
+110,Robert,IT,78000
+111,Olivia,Finance,87000
+112,Liam,HR,71000
+113,Mia,Marketing,73000
+114,Ethan,Marketing,67000
+115,Ava,IT,82000
+
+d.txt
+Sales,201
+HR,202
+IT,203
+Finance,204
+Marketing,205
+Operations,206
+
+Run Pig in Interactive Mode: pig -x mapreduce
+Load Data:
+employees = LOAD 'pig/e.txt' USING PigStorage(',') AS (emp_id:INT, name:CHARARRAY, department:CHARARRAY, salary:INT);
+
+DUMP employees;
+
+departments = LOAD 'pig/d.txt' USING PigStorage(',') AS (department_name:CHARARRAY, manager_id:INT);
+
+DUMP departments;
+
+Filter Employees with Different Conditions
+Employees earning more than 70000: 
+high_salary = FILTER employees BY salary > 70000;
+DUMP high_salary;
+Employees in the "IT" department:
+it_employees = FILTER employees BY department == 'IT';
+DUMP it_employees;
+Employees earning between 65000 and 80000:
+mid_salary = FILTER employees BY salary >= 65000 AND salary <= 80000;
+DUMP mid_salary;
+
+Project Specific Columns:
+Select only employee names and salaries:
+          name_salary = FOREACH employees GENERATE name, salary;
+          DUMP name_salary;
+Get employee ID, name, and department (renaming fields):
+id_name_dept = FOREACH employees GENERATE emp_id AS ID, name AS EmployeeName, department AS Dept;
+DUMP id_name_dept;
+Sorting Employees:
+Sort employees by salary (Ascending):
+sorted_salary_asc = ORDER employees BY salary ASC;
+DUMP sorted_salary_asc;
+Sort employees by salary (Descending):
+sorted_salary_desc = ORDER employees BY salary DESC;
+DUMP sorted_salary_desc;
+3. Sort employees by department and then by salary:
+sorted_dept_salary = ORDER employees BY department ASC, salary DESC;
+DUMP sorted_dept_salary;
+Group Employees by Department:
+grouped_by_dept = GROUP employees BY department;
+DUMP grouped_by_dept;
+Check count of employees in each department:
+dept_count = FOREACH grouped_by_dept GENERATE group AS department, COUNT(employees) AS emp_count;
+DUMP dept_count;
+Join Employees with Department Data:
+Simple Join:
+joined_data = JOIN employees BY department, departments BY department_name;
+DUMP joined_data;
+Selecting only specific columns after join:
+joined_selected = FOREACH joined_data GENERATE employees::name, employees::department, departments::manager_id;
+DUMP joined_selected;

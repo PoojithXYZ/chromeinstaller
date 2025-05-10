@@ -1,0 +1,60 @@
+TASK 6 
+Develop a pig Latin script to count the number of words in a text file. 
+nano input.txt
+Hadoop is powerful
+Pig is easy to use
+Hadoop and Pig work together
+Pig is powerful and flexible
+hdfs dfs -mkdir -p t6/
+hdfs dfs -put input.txt t6
+nano wordcount.pig
+
+lines = LOAD 't6/input.txt' USING TextLoader() AS (line:CHARARRAY);
+
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+filtered_words = FILTER words BY word IS NOT NULL;
+
+grouped_words = GROUP filtered_words BY word;
+
+word_count = FOREACH grouped_words GENERATE group AS word, COUNT(filtered_words) AS count;
+
+STORE word_count INTO 't6 /output' USING PigStorage(',');
+
+pig -x mapreduce wordcount.pig
+ 
+Develop a pig Latin script to find maximum temperature across all the years using weather data set. 
+
+
+nano weather.txt
+01/01/2010, 5.2, 15.8
+05/02/2010, 8.5, 18.4
+10/03/2010, 10.1, 22.6
+15/04/2010, 12.3, 25.9
+20/05/2010, 15.0, 30.5
+25/06/2011, 18.2, 32.4
+30/07/2011, 20.8, 35.7
+05/08/2011, 22.1, 36.2
+10/09/2011, 16.4, 28.5
+15/10/2011, 12.9, 24.3
+20/11/2012, 6.5, 20.7
+25/12/2012, 3.2, 18.6
+01/01/2013, 2.8, 15.9
+10/02/2013, 5.7, 19.3
+20/03/2013, 7.4, 21.8
+30/04/2013, 9.6, 23.5
+15/06/2013, 17.3, 38.2
+10/07/2013, 21.7, 40.6
+05/08/2014, 23.1, 41.3
+10/09/2014, 20.9, 39.8
+hdfs dfs -put weather.txt t6
+nano max_temperature.pig
+ weather_data = LOAD 't6 /weather.txt' USING PigStorage(',')  AS (date:CHARARRAY, min_temp:FLOAT, max_temp:FLOAT);
+
+max_temperature = ORDER weather_data BY max_temp DESC;
+
+highest_temp = LIMIT max_temperature 1;
+
+STORE highest_temp INTO 't6/output1 ' USING PigStorage(',');
+
+pig -x mapreduce max_temperature.pig

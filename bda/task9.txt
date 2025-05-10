@@ -1,0 +1,95 @@
+TASK 9 
+Practice User Defined functions and indexes using Hive. 
+hive
+Create the Table:
+CREATE TABLE students (id INT, name STRING, marks INT, dob STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+Insert Sample Data:
+INSERT INTO students VALUES
+(1, 'Alice', 85, '2000-05-15'),
+(2, 'Bob', 78, '1999-11-22'),
+(3, 'Charlie', 92, '2001-07-30'),
+(4, 'David', 40, '2000-02-18'),
+(5, 'Emma', 95, '1998-12-05'),
+(6, 'Frank', NULL, '2001-09-14'),
+(7, 'Grace', 72, '2002-04-07');
+Write Java UDFs:
+Convert Names to Uppercase: (nano UpperCaseUDF.java)
+import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.io.Text;
+
+public class UpperCaseUDF extends UDF {
+    public Text evaluate(Text input) {
+        if (input == null) return null;
+        return new Text(input.toString().toUpperCase());
+    }
+}
+Check Passing Marks (Pass/Fail): (PassFailUDF.java)
+import org.apache.hadoop.hive.ql.exec.UDF;
+
+public class PassFailUDF extends UDF {
+    public String evaluate(Integer marks) {
+        if (marks == null) return "No Marks";
+        return marks >= 50 ? "PASS" : "FAIL";
+    }
+}
+Calculate Age from DOB: (AgeCalculatorUDF.java)
+import org.apache.hadoop.hive.ql.exec.UDF;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
+
+public class AgeCalculatorUDF extends UDF {
+    public Integer evaluate(String dob) {
+        if (dob == null) return null;
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date birthDate = sdf.parse(dob);
+
+            Calendar birthCal = Calendar.getInstance();
+            birthCal.setTime(birthDate);
+            
+            Calendar currentCal = Calendar.getInstance();
+
+            int age = currentCal.get(Calendar.YEAR) - birthCal.get(Calendar.YEAR);
+
+            // Adjust age if birthday has not yet occurred this year
+            if (currentCal.get(Calendar.DAY_OF_YEAR) < birthCal.get(Calendar.DAY_OF_YEAR)) {
+                age--;
+            }
+
+            return age;
+        } catch (Exception e) {
+            return null;  // Return null if parsing fails
+        }       }    }
+Compile & Create JAR File:
+Compile:
+javac -cp $(hadoop classpath):/usr/lib/hive/lib/hive-exec.jar -d . UpperCaseUDF.java PassFailUDF.java AgeCalculatorUDF.java
+
+JAR File:
+jar -cf StudentUDFs.jar UpperCaseUDF.class PassFailUDF.class AgeCalculatorUDF.class
+Register UDFs in Hive:
+ADD JAR /home/cloudera/hive_udfs/StudentUDFs.jar;
+Create Temporary Functions:
+CREATE TEMPORARY FUNCTION to_upper AS 'UpperCaseUDF';
+CREATE TEMPORARY FUNCTION pass_fail AS 'PassFailUDF';
+CREATE TEMPORARY FUNCTION calculate_age AS 'AgeCalculatorUDF';
+Run Queries Using UDFs:
+Convert Names to Uppercase:
+SELECT id, to_upper(name) AS student_name, marks FROM students;
+Find Passing or Failing Students:
+SELECT id, name, marks, pass_fail(marks) AS result FROM students;
+Calculate Student Ages:
+SELECT id, name, dob, calculate_age(dob) AS age FROM students;
+
+Output:
+
+
+
+
+
+
+
+
+
+

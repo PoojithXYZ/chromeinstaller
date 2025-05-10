@@ -1,0 +1,102 @@
+TASK 12:
+Practice on SparkSQL environment.
+Launch spark-shell: spark-shell
+
+Create SQLContext:
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+import sqlContext.implicits._
+
+Create Sample Dataset (Employees):
+val empData = Seq(
+  (1, "Alice", "HR", 3000),
+  (2, "Bob", "IT", 4000),
+  (3, "Charlie", "IT", 5000),
+  (4, "David", "Finance", 3500),
+  (5, "Eva", "HR", 2800)
+)
+val empDF = empData.toDF("id", "name", "dept", "salary")
+empDF.registerTempTable("employees")
+empDF.show()
+
+
+Practice SparkSQL Queries
+Select All
+sqlContext.sql("SELECT * FROM employees").show()
+
+Filter by Salary > 3000
+sqlContext.sql("SELECT * FROM employees WHERE salary > 3000").show()
+
+Group by Department
+sqlContext.sql("SELECT dept, COUNT(*) as total_employees, AVG(salary) as avg_salary FROM employees GROUP BY dept").show()
+
+Order by Salary Descending
+sqlContext.sql("SELECT * FROM employees ORDER BY salary DESC").show()
+
+
+
+
+Find Highest Salary
+sqlContext.sql("SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 1").show()
+
+Join with Another Table
+Create a second dataset for departments:
+val deptData = Seq(
+  ("HR", "New York"),
+  ("IT", "San Francisco"),
+  ("Finance", "Chicago")
+)
+val deptDF = deptData.toDF("dept", "location")
+deptDF.registerTempTable("departments")
+
+
+
+
+
+Perform an inner join:
+sqlContext.sql("SELECT e.name, e.dept, d.location FROM employees e JOIN departments d ON e.dept = d.dept").show()
+
+Left Outer Join
+sqlContext.sql("""
+  SELECT e.name, e.dept, d.location
+  FROM employees e
+  LEFT JOIN departments d
+  ON e.dept = d.dept
+""").show()
+
+	
+
+
+Right Outer Join
+sqlContext.sql("""
+  SELECT d.dept, d.location, e.name
+  FROM employees e
+  RIGHT JOIN departments d
+  ON e.dept = d.dept
+""").show()
+
+Group by Department with Count and Average Salary
+sqlContext.sql("""
+  SELECT dept, COUNT(*) as emp_count, AVG(salary) as avg_salary
+  FROM employees
+  GROUP BY dept
+""").show()
+
+Employees with Above-Average Salary
+val avgSal = sqlContext.sql("SELECT AVG(salary) as avg FROM employees").first().getDouble(0)
+
+sqlContext.sql(s"SELECT * FROM employees WHERE salary > $avgSal").show()
+
+Find the Top 2 Highest Paid Employees
+sqlContext.sql("""
+  SELECT name, salary
+  FROM employees
+  ORDER BY salary DESC
+  LIMIT 2
+""").show()
+
+Filter Employees in Specific Departments
+sqlContext.sql("""
+  SELECT * FROM employees
+  WHERE dept IN ('IT', 'HR')
+""").show()
+

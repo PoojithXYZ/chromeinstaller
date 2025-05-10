@@ -1,0 +1,40 @@
+
+
+TASK 1
+Practice basic HDFS commands in Hadoop environment.
+
+TASK 2
+a) Ingest structured data using Apache Sqoop.
+b) Ingest structured and unstructured data using Flume.
+
+TASK 3
+a) Write a word count program to simulate the Map Reduce Paradigm.
+b) Write a Map Reduce program to perform matrix multiplication.
+
+TASK 4
+Implement a Map Reduce program to mine and analyze weather data set.
+
+TASK 5
+Write a Pig Latin script to sort, group, join, project, and filter the data.
+
+TASK 6
+a) Develop a pig Latin script to count the number of words in a text file.
+b) Develop a pig Latin script to find maximum temperature across all the years usingweather data set.
+
+TASK 7
+Create User Defined Functions/Eval functions in Pig to handle unwanted data during data processing.
+
+TASK 8
+Use Hive to create, alter, and drop databases, tables and views.
+
+TASK 9
+Practice User Defined functions and indexes using Hive.
+
+TASK 10
+Write HBase queries to handle databases.
+
+TASK 11
+Develop a program in Spark framework for processing of large datasets.
+
+TASK 12
+Practice on SparkSQL environment.

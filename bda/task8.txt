@@ -1,0 +1,66 @@
+TASK 8 
+Use Hive to create, alter, and drop databases, tables and views. 
+
+Start Hive: hive
+Create a new database: CREATE DATABASE company_db;
+
+Verify the database: SHOW DATABASES;
+
+Use the database: USE company_db;
+
+Create Tables: 
+ Employee Table:
+    CREATE TABLE employees (emp_id INT, name STRING, age INT, salary FLOAT,
+    department STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ','   STORED AS TEXTFILE;
+
+ Department Table:
+  CREATE TABLE departments (dept_id INT, dept_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+Verify tables: SHOW TABLES;
+
+Insert Data into Tables:
+  INSERT INTO employees VALUES (101, 'Alice', 30, 50000.5, 'HR');
+  INSERT INTO employees VALUES (102, 'Bob', 28, 60000, 'IT');
+  INSERT INTO employees VALUES (103, 'Charlie', 35, 75000, 'Finance');
+
+
+  INSERT INTO departments VALUES (1, 'HR');
+  INSERT INTO departments VALUES (2, 'IT');
+  INSERT INTO departments VALUES (3, 'Finance');
+
+
+
+Query Data: 
+   SELECT * FROM employees;
+
+   SELECT * FROM departments;
+
+    Find employees in IT:
+       SELECT name, salary FROM employees WHERE department = 'IT';
+
+   Count employees per department:
+       SELECT department, COUNT(*) FROM employees GROUP BY department;
+
+
+Alter Tables: 
+  Add a New Column: 
+      ALTER TABLE employees ADD COLUMNS (email STRING);
+
+
+ Verify changes:
+      DESCRIBE employees;
+
+
+ Change Column Data Type:
+     ALTER TABLE employees CHANGE COLUMN salary salary DOUBLE;
+
+Create and Drop Views:
+   Create a View for High Salary Employees:
+         CREATE VIEW high_salary AS SELECT name, salary FROM employees WHERE  salary > 60000;
+
+     View data:
+          SELECT * FROM high_salary;
+
+      Drop a View:
+          DROP VIEW high_salary;
+

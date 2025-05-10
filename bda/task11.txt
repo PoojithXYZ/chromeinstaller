@@ -1,0 +1,35 @@
+TASK 11 
+Develop a program in Spark framework for processing of large datasets. 
+    dataset.txt
+Apache Spark is a fast and general engine for large-scale data processing
+Spark runs on Hadoop Apache Mesos Kubernetes standalone or in the cloud
+It can access diverse data sources including HDFS Apache Cassandra Apache HBase Apache Hive
+Big data processing with Spark is efficient and scalable
+   Place the File in HDFS
+hdfs dfs -mkdir /t11
+hdfs dfs -put dataset.txt /t11
+
+  wordcount.py
+from pyspark import SparkContext
+
+sc = SparkContext("local", "WordCount")
+
+input_path = "hdfs:///t11/dataset.txt"
+output_path = "hdfs:///t11/output"
+
+text_file = sc.textFile(input_path)
+
+word_counts = (
+    text_file.flatMap(lambda line: line.split(" ")).map(lambda word: (word, 1))   .reduceByKey(lambda a, b: a + b)
+)
+
+word_counts.saveAsTextFile(output_path)
+
+sc.stop()
+  Run the script: spark-submit wordcount.py
+
+
+Check the output in HDFS:
+
+See the output:
+

@@ -1,0 +1,9 @@
+TASK 1 – Practice HDFS Commands and File Operations
+1. Create directories, upload/download files, list contents in HDFS.
+-mkdir | put/copyfromlocal + get/copytolocal | ls
+2. Merge multiple small files into one large file in HDFS.
+-getmerge /small_files /op.txt
+3. Set permissions and ownership for HDFS files/folders.
+-chmod u+rwx,g+rx,o+rx | -chown new_owner:new_group | -chgrp
+4. Monitor and report HDFS disk usage.
+-du(s -> for dir in lab-man) (flag: aggregate size of dir)

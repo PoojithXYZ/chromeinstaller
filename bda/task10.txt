@@ -1,0 +1,81 @@
+TASK 10: Write HBase queries to handle databases.
+
+Start HBase: hbase shell
+Create Tables with Multiple Columns: 
+create 'students', 'personal', 'academic', 'contact'
+
+Insert Data Into HBase Table:
+put 'students', '1', 'personal:name', 'Alice Johnson'
+put 'students', '1', 'personal:age', '22'
+put 'students', '1', 'academic:department', 'Computer Science'
+put 'students', '1', 'academic:marks', '89.5'
+put 'students', '1', 'contact:email', 'alice@example.com'
+put 'students', '1', 'contact:phone', '9876543210'
+
+put 'students', '2', 'personal:name', 'Bob Smith'
+put 'students', '2', 'personal:age', '21'
+put 'students', '2', 'academic:department', 'Mathematics'
+put 'students', '2', 'academic:marks', '76.0'
+put 'students', '2', 'contact:email', 'bob@example.com'
+put 'students', '2', 'contact:phone', '8765432109'
+
+Retrieve Data from HBase Table
+Fetch all records: scan 'students'
+
+
+Fetch a specific row:  get 'students', '1'
+
+
+Fetch a specific column value: get 'students', '2', 'personal:name'
+
+Fetch multiple columns in a row:  get 'students', '1', {COLUMNS => ['personal:name', 'academic:marks']}
+
+
+Update Data in HBase: put 'students', '1', 'academic:marks', '95.0'
+
+Delete Data: delete 'students', '2', 'contact:email'
+
+Create Another Table: create 'courses', 'info', 'professor'
+
+		Insert records: 
+		   put 'courses', 'CS101', 'info:name', 'Data Structures'
+put 'courses', 'CS101', 'info:credits', '4'
+put 'courses', 'CS101', 'professor:name', 'Dr. Lee'
+
+put 'courses', 'MATH201', 'info:name', 'Linear Algebra'
+put 'courses', 'MATH201', 'info:credits', '3'
+put 'courses', 'MATH201', 'professor:name', 'Dr. Smith'
+
+	Retrieve course details:  get 'courses', 'CS101'
+
+List and Count Tables:
+List all tables: list
+
+
+
+
+
+Count total records in a table:  count 'students'
+                                                               count ‘courses’
+
+
+Using Filters in HBase: 
+Retrieve students from the Computer Science department:
+scan 'students', {FILTER => "SingleColumnValueFilter('academic', 'department', =, 'binary:Computer Science')"}
+
+
+
+
+Retrieve students who scored more than 80 marks
+scan 'students', {FILTER => "SingleColumnValueFilter('academic', 'marks', >, 'binary:80')"}
+      	
+
+
+Disable and Drop Tables: 
+disable 'students'
+drop 'students'
+
+disable 'courses'
+drop 'courses'
+
+

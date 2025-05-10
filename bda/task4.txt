@@ -1,0 +1,75 @@
+mm.py
+#!/usr/bin/env python
+import sys
+for line in sys.stdin:
+    line = line.strip()  
+    values = line.split()  
+        if len(values) < 3:
+        continue  # Skip malformed lines
+    try:
+        date = values[0]  # Extract date (e.g., 20200101)
+        max_temp = float(values[1])  # Extract max temperature
+        min_temp = float(values[2])  # Extract min temperature
+        print "%s\t%.2f\t%.2f" % (date, max_temp, min_temp)
+    except ValueError:
+        continue  
+
+rr.py
+#!/usr/bin/env python
+import sys
+hot_day = None
+cold_day = None
+hot_temp = float('-inf')
+cold_temp = float('inf')
+for line in sys.stdin:
+    values = line.strip().split("\t")
+    
+    if len(values) != 3:
+        continue  
+    
+    try:
+        date = values[0]
+        max_temp = float(values[1])
+        min_temp = float(values[2])
+
+        
+        if max_temp > hot_temp:
+            hot_temp = max_temp
+            hot_day = date
+
+
+        if min_temp < cold_temp:
+            cold_temp = min_temp
+            cold_day = date
+
+    except ValueError:
+        continue  
+
+
+if hot_day and cold_day:
+    print "%s\t%s" % ("Hottest Day:", hot_day)
+    print "%s\t%s" % ("Coldest Day:", cold_day)
+
+input file (we.txt)
+20200101	18.8	21.8
+20200102	19.1	23.4
+20200103	18.4	26.8
+20200104	22.0	28.0
+20200105	17.5	20.5
+20200106	16.2	21.0
+20200107	20.0	27.3
+20200108	19.8	25.0
+20200109	18.0	22.7
+20200110	21.5	29.4
+
+
+
+check mapper output:
+hdfs dfs -cat weather/we.txt | python mm.py
+
+check mapper output:
+hdfs dfs -cat weather/we.txt | python mm.py | sort | python rr.py
+
+Command to run the output:
+
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar -input weather/we.txt -output weather/output -mapper "python mm.py" -reducer "python rr.py" -file mm.py -file rr.py
