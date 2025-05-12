@@ -1,3 +1,10 @@
+list.txt     task12_a.py  task3.py    task6.py       task9.py
+task10.py    task12_b.py  task4.py    task7_docx.py
+task11_a.py  task1.py     task5_a.py  task7_nb.py
+task11_b.py  task2.py     task5_b.py  task8.py
+
+
+------------------
 
 Task 1
 Write a python program to import and export data using Panda’s library functions.
@@ -36,4 +43,6 @@ b) Implement Boosting ensemble method on a given dataset.
 Task 12
 a) Write a python program to implement K-Means clustering algorithm.
 b) Write a python program to implement the BIRCH algorithm.
+
+-----------------------------------
 
